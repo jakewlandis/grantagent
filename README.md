@@ -1,13 +1,13 @@
 # grantagent
-API documentation for connecting Agentforce in Salesforce to Grants.gov via Mulesoft
+# API documentation for connecting Agentforce in Salesforce to Grants.gov via Mulesoft
 
-There are two designs in this repository.
+## There are two designs in this repository.
 
 The first is designed to retrieve a list of grant funding opportunities.
 The second is designed to retrieve the details of a specific opportunity.
 
-Retrieiving a list of grant funding opportunities: 
-This is an openapi 3.0 implementation designed to retrieve 10 grant opportunities from grants.gov using their open 'search2' API. (https://www.grants.gov/api/api-guide)
+## Retrieiving a list of grant funding opportunities: 
+### This is an openapi 3.0 implementation designed to retrieve 10 grant opportunities from grants.gov using their open 'search2' API. (https://www.grants.gov/api/api-guide)
 
 When tied to a Mulesoft instance, this API format returns the first 10 results for a given keyword or series of pipe-delimited keywords in a format designed for use with Agentforce.
 
@@ -15,7 +15,7 @@ Example:
 https://[mulesoftendpoint]/grantgov?e=Chemistry
 
 Returns:
-
+```
 {
     "opportunity0": "356055 | Computational and Data-Enabled Science and Engineering | National Science Foundation",
     "opportunity1": "341244 | Division of Chemistry: Disciplinary Research Programs: No Deadline Pilot | National Science Foundation",
@@ -28,12 +28,13 @@ Returns:
     "opportunity8": "357934 | Fiscal Year (FY) 2025 Directors' Research Initiative (DRI) | Air Force Office of Scientific Research",
     "opportunity9": "358300 | Research, Development, and Training in Isotope Production | Office of Science"
 }
+```
 
 This data is returned as a single object as Mulesoft Topics for Agentforce does not accept arrays.  This design allows us to present the user with options for further investigation or use in their Salesforce org.
 
 
-Retrieving the details of a specific opportunity:
-This is an openapi 3.0 implementation designed to retrieve 10 grant opportunities from grants.gov using their open 'fetchOpportunity' API. (https://www.grants.gov/api/api-guide)
+## Retrieving the details of a specific opportunity:
+### This is an openapi 3.0 implementation designed to retrieve 10 grant opportunities from grants.gov using their open 'fetchOpportunity' API. (https://www.grants.gov/api/api-guide)
 
 When tied to a Mulesoft instance, this API format returns the title, agency, synopsis, response date and url of an opportunity in a format designed for use with Agentforce.
 
@@ -41,6 +42,7 @@ Example:
 https://[mulesoftendpoint]/grantgovdetail?opp=356530
 
 Returns:
+```
 {
     "title": "BRAIN Initiative: Reagent Resources for Brain Cell Type-Specific Access to Broaden Distribution of Enabling Technologies for Neuroscience (U24 Clinical Trial Not Allowed)",
     "agencyName": "National Institutes of Health",
@@ -48,3 +50,4 @@ Returns:
     "responseDate": "Jun 15, 2027 12:00:00 AM EDT",
     "url": "http://grants.nih.gov/grants/guide/rfa-files/RFA-MH-26-120.html"
 }
+```
