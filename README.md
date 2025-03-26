@@ -1,10 +1,11 @@
 # grantagent
 # API documentation for connecting Agentforce in Salesforce to Grants.gov via Mulesoft
 
-## There are two designs in this repository.
+## There are two API designs in this repository and one Mulesoft project XML file.
 
-The first is designed to retrieve a list of grant funding opportunities.
-The second is designed to retrieve the details of a specific opportunity.
+The first API (grantagentacb.yaml) is designed to retrieve a list of grant funding opportunities.
+The second API (grantdetailagentacb.yaml) is designed to retrieve the details of a specific opportunity.
+The Mulesoft configuration XML (grant_api.xml) retrieves grant data from Grants.gov and formats it to meet the specifications of the above files.
 
 ## Retrieiving a list of grant funding opportunities: 
 ### This is an openapi 3.0 implementation designed to retrieve 10 grant opportunities from grants.gov using their open 'search2' API. (https://www.grants.gov/api/api-guide)
