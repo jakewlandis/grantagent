@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="76d3be2a-6852-4c1c-a8ea-f01328c1b31d">
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="31be931b-09c3-49a4-a8d6-18b48a607020" >
+		<http:request-connection protocol="HTTPS" host="api.grants.gov" />
+	</http:request-config>
+	<api-gateway:autodiscovery apiId="20266376" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="a2278d9a-6a4d-471e-bdad-74eabc32cbe9" flowRef="grantgov"/>
+	<api-gateway:autodiscovery apiId="20266379" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="46b08df5-37c9-44ed-9807-ea0ba116f023" flowRef="grantgovdetail" />
+	<flow name="grantgov" doc:id="e23c8f6d-e0f7-425a-9609-f3b6522a8ded" >
+		<http:listener doc:name="Listener" doc:id="900311de-e295-4c9e-bd0f-82c021a7a919" config-ref="HTTP_Listener_config" path="grantgov"/>
+		<set-variable value='#["\"" ++ attributes.queryParams.e as String ++ "\""]' doc:name="Set Variable" doc:id="f6f33ec9-aba7-4cc5-add7-4c2b51528b51" variableName="expertise" />
+		<http:request method="POST" doc:name="Request" doc:id="c12fec50-1ce2-4122-a4d0-ac4f045ca9cd" config-ref="HTTP_Request_configuration" path="/v1/api/search2">
+			<http:body ><![CDATA[#[%dw 2.0
+output json
+---
+{"rows": 10,"keyword": vars.expertise,"oppNum": "","eligibilities": "","agencies": "","oppStatuses": "forecasted|posted","aln": "",
+"fundingCategories": ""}]]]></http:body>
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Content-Type" : "application/json",
+	"Connection" : "keep-alive"
+}]]]></http:headers>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="8976d2cf-c247-4c80-b0b0-46cd0d45e29e">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload.data.oppHits map (item,index) -> {
+    index: index,
+    id: item.id,
+    agency: item.agency,
+    title: item.title
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="1f4f0c2c-79d1-4d64-bcb7-67988b0cbfb2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload reduce ((env, obj={}) -> obj ++ {
+    ("opportunity" ++ env.index) : env.id ++ " | " ++ env.title ++ " | " ++ env.agency
+})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="grantgovdetail" doc:id="94a3e36a-2e83-41a6-9231-68e1d9219873" >
+		<http:listener doc:name="Listener" doc:id="681c02c1-8f08-4944-8509-9122538f0cdb" config-ref="HTTP_Listener_config" path="grantgovdetail"/>
+		<set-variable value='#[attributes.queryParams.opp as Number]' doc:name="Set Variable" doc:id="0920556f-41b2-402c-9185-da236d529318" variableName="opp"/>
+		<http:request method="POST" doc:name="Request" doc:id="09d4126e-60bf-408c-ad3b-3143ed1eb14d" config-ref="HTTP_Request_configuration" path="/v1/api/fetchOpportunity">
+			<http:body ><![CDATA[#[%dw 2.0
+output json
+---
+{"opportunityId": vars.opp}]]]></http:body>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="9125b849-2ba8-4dcf-871f-675e4809b397">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json skipNullOn = "everywhere"
+---
+{
+title: payload.data.opportunityTitle,
+agencyName: payload.data.synopsis.agencyName,
+synopsis: payload.data.synopsis.synopsisDesc,
+responseDate: payload.data.synopsis.responseDate,
+url: payload.data.synopsis.fundingDescLinkUrl
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
