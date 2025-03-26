@@ -1,0 +1,79 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: grantagentACB
+x-sfdc:
+  agent:
+    topic:
+      name: grantagentACB
+      classificationDescription: Use the API description
+      scope: Your job is to look up grant opportunities.
+      instructions:
+        - Always ask the user for an expertise or keyword.
+paths:
+  /grantgov:
+    get:
+      operationId: get-operation
+      description: Returns a list of grant opportunities from grants.gov
+      x-sfdc:
+        agent:
+          action:
+            publishAsAgentAction: true
+      summary: Returns a list of grant opportunities.
+      parameters:
+        - in: query
+          name: e
+          required: true
+          description: The id of the opportunity
+          x-sfdc:
+            agent:
+              action:
+                isUserInput: true
+          schema:
+            properties:
+            $ref: "#/components/schemas/e"
+            additionalProperties: false 
+      responses:
+        "200": # status code
+          description: A text list of grant opportunities
+          content:
+            application/json:
+              schema:
+                properties:
+                $ref: "#/components/schemas/grant_opportunities"
+                additionalProperties: false
+components:
+  schemas:
+    grant_opportunities: 
+      x-sfdc:
+        agent:
+            action:
+                isDisplayable: true
+      type: object
+      properties:
+        opportunity0:
+          type: string
+        opportunity1:
+          type: string 
+        opportunity2:
+          type: string
+        opportunity3:
+          type: string
+        opportunity4:
+          type: string
+        opportunity5:
+          type: string 
+        opportunity6:
+          type: string
+        opportunity7:
+          type: string 
+        opportunity8:
+          type: string
+        opportunity9:
+          type: string   
+      additionalProperties: false
+    e:
+      type: string
+      required: true
+      description: Contains the expertise or keyword used to look up grant opportunities.
+      additionalProperties: false

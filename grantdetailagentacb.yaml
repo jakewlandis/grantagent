@@ -1,0 +1,79 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: GrantDetailAgentACB
+x-sfdc:
+  agent:
+    topic:
+      name: GrantDetailAgentACB
+      classificationDescription: Use the API description
+      scope: Your job is to look for the details of a grant based on the opportunity id.
+      instructions:
+        - Always ask the user for the opportunity id.
+paths:
+  /grantgovdetail:
+    get:
+      operationId: get-operation
+      description: This is a post operation to provide a opportunity id.
+      x-sfdc:
+        agent:
+          action:
+            publishAsAgentAction: true
+      summary: Return details about the grant
+      parameters:
+        - in: query
+          name: opp
+          required: true
+          description: The id of the opportunity
+          x-sfdc:
+            agent:
+              action:
+                isUserInput: true
+          schema:
+            properties:
+            $ref: "#/components/schemas/opp"
+            additionalProperties: false  
+      responses:
+        "200": # status code
+          description: A JSON array of grant opportunities
+          content:
+            application/json:
+              schema:
+                properties:
+                $ref: "#/components/schemas/grant_details"
+                additionalProperties: false
+components:
+  schemas:
+    grant_details:
+      x-sfdc:
+        agent:
+            action:
+                isDisplayable: true
+      type: object
+      properties:
+        title:
+            type: string
+            description: The title of the grant opportunity
+            additionalProperties: false
+        agencyName:
+            type: string
+            description: The name of the agency offering the opportunity.
+            additionalProperties: false
+        synopsis:
+            type: string
+            description: A description of the opportunity.
+            additionalProperties: false
+        responseDate:
+            type: string
+            description: The date by which the response is due.
+            additionalProperties: false
+        url:
+            type: string
+            description: The url of the opportunity,
+            additionalProperties: false
+      additionalProperties: false
+    opp:
+      type: string
+      required: true
+      description: Contains the opportunity ids needed to look up the details.
+      additionalProperties: false
